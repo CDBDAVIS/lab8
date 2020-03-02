@@ -314,7 +314,7 @@ module MakeBestInterval (Endpoint : ORDERED_TYPE)
 
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
       match intvl1, intvl2 with
-      | _, Empty -> Empty
+      | _, Empty
       | Empty, _ -> Empty
       | Interval (a, b), Interval (c, d) ->
         if compare a c > 0 && compare b d < 0 then Interval (a, b)
@@ -327,8 +327,7 @@ module MakeBestInterval (Endpoint : ORDERED_TYPE)
   end
 ;;
 
-(*
-........................................................................
+(*........................................................................
 Exercise 3B: Use the MakeBestInterval functor to create a new int
 interval module, and test that it works as expected.
 
