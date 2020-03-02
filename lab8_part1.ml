@@ -327,7 +327,7 @@ module MakeBestInterval (Endpoint : ORDERED_TYPE)
   end
 ;;
 
-(*)
+(*
 ........................................................................
 Exercise 3B: Use the MakeBestInterval functor to create a new int
 interval module, and test that it works as expected.
