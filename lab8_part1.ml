@@ -229,7 +229,6 @@ module MakeSafeInterval (Endpoint : ORDERED_TYPE) =
         else Empty
     end ;;
 
-  end ;;
 
 (* We have successfully made our returned module abstract, but believe
 it or not, it is now too abstract. In fact, we have not exposed the

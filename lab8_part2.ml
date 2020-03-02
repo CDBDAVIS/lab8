@@ -111,14 +111,10 @@ module MakeStack (Element: SERIALIZE) : (STACK with type element = Element.t) =
       | h :: t -> (h, t)
 
     let top (s : stack) : element =
-      match s with
-      | [] -> raise Empty
-      | h :: t -> h
+      fst (pop_helper s)
 
     let pop (s : stack) : stack =
-      match s with
-      | [] -> raise Empty
-      | h :: t -> t
+      snd (pop_helper s)
 
     let map : (element -> element) -> stack -> stack =
       List.map
