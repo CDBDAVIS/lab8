@@ -113,17 +113,13 @@ module MakeInterval (Endpoint : ORDERED_TYPE) =
     (* intersect intvl1 intvl2 -- Returns the intersection of `intvl1`
        and `intvl2` *)
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
+      let inorder a b = if Endpoint.compare a b <= 0 then a, b else b, a in
       match intvl1, intvl2 with
-      | _, Empty -> Empty
+      | _, Empty
       | Empty, _ -> Empty
       | Interval (a, b), Interval (c, d) ->
-        if compare a c > 0 && compare b d < 0 then Interval (a, b)
-        else if compare c a > 0 && compare d b < 0 then Interval (c, d)
-        else if compare b c > 0 && compare b d < 0
-          && compare a c < 0 then Interval (c, b)
-        else if compare d a > 0 && compare d b < 0
-          && compare c a < 0 then Interval (a, d)
-        else Empty
+        let (_, low), (high, _)  = inorder a c, inorder b d in
+         create low high
     end ;;
 
 (*......................................................................
@@ -216,17 +212,13 @@ module MakeSafeInterval (Endpoint : ORDERED_TYPE) =
       | Empty -> false
 
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
+      let inorder a b = if Endpoint.compare a b <= 0 then a, b else b, a in
       match intvl1, intvl2 with
-      | _, Empty -> Empty
+      | _, Empty
       | Empty, _ -> Empty
       | Interval (a, b), Interval (c, d) ->
-        if compare a c > 0 && compare b d < 0 then Interval (a, b)
-        else if compare c a > 0 && compare d b < 0 then Interval (c, d)
-        else if compare b c > 0 && compare b d < 0
-          && compare a c < 0 then Interval (c, b)
-        else if compare d a > 0 && compare d b < 0
-          && compare c a < 0 then Interval (a, d)
-        else Empty
+        let (_, low), (high, _)  = inorder a c, inorder b d in
+         create low high
     end ;;
 
 
