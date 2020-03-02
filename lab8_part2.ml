@@ -168,3 +168,6 @@ module IntStringSerialize =
   end ;;
 
 
+module IntStringStack =
+  MakeStack(IntStringSerialize) ;;
+
