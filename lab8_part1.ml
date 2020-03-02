@@ -182,7 +182,10 @@ module type INTERVAL =
   sig
     type interval
     type endpoint
-    (* ... complete the interface here ... *)
+    val create : endpoint -> endpoint -> interval
+    val is_empty : interval -> bool
+    val contains : interval -> endpoint -> bool
+    val intersect : interval -> interval -> interval
   end ;;
 
 (*......................................................................
@@ -194,7 +197,38 @@ MakeInterval above.) **Don't forget to specify the module type.**
 
 module MakeSafeInterval (Endpoint : ORDERED_TYPE) =
   struct
-    (* ... complete the module implementation here ... *)
+    type endpoint = Endpoint.t
+    type interval =
+      | Interval of endpoint * endpoint
+      | Empty
+
+    let create (low : endpoint) (high : endpoint) : interval =
+      if Endpoint.compare low high > 0 then Empty
+      else Interval (low, high)
+
+    let is_empty (intvl : interval) : bool =
+      intvl = Empty
+
+
+    let contains (intvl : interval) (x : Endpoint.t) : bool =
+      match intvl with
+      | Interval (a,b) -> compare a x < 0 && compare x b < 0
+      | Empty -> false
+
+    let intersect (intvl1 : interval) (intvl2 : interval) : interval =
+      match intvl1, intvl2 with
+      | _, Empty -> Empty
+      | Empty, _ -> Empty
+      | Interval (a, b), Interval (c, d) ->
+        if compare a c > 0 && compare b d < 0 then Interval (a, b)
+        else if compare c a > 0 && compare d b < 0 then Interval (c, d)
+        else if compare b c > 0 && compare b d < 0
+          && compare a c < 0 then Interval (c, b)
+        else if compare d a > 0 && compare d b < 0
+          && compare c a < 0 then Interval (a, d)
+        else Empty
+    end ;;
+
   end ;;
 
 (* We have successfully made our returned module abstract, but believe
@@ -207,7 +241,11 @@ Exercise 2C: Create an IntSafeInterval module using the new
 MakeSafeInterval functor.
 ......................................................................*)
 
-module IntSafeInterval = struct end ;;
+module IntSafeInterval = MakeSafeInterval
+  (struct
+    type t = int
+    let compare = Stdlib.compare
+  end) ;;
 
 (* Now, try evaluating the following expression in the REPL:
 
@@ -254,12 +292,43 @@ module satisfying INTERVAL *with appropriate sharing constraints
 to allow the creation of generic interval modules*.
 ......................................................................*)
 
-(* ... place your implementation of the MakeBestInterval functor here ... *)
+module MakeBestInterval (Endpoint : ORDERED_TYPE)
+                      : (INTERVAL with type endpoint = Endpoint.t) =
+  struct
+    type endpoint = Endpoint.t
+    type interval =
+      | Interval of endpoint * endpoint
+      | Empty
 
-(* We now have a fully functioning functor that can create interval
-modules of whatever type we want, with the appropriate abstraction
-level.
+    let create (low : endpoint) (high : endpoint) : interval =
+      if Endpoint.compare low high > 0 then Empty
+      else Interval (low, high)
 
+    let is_empty (intvl : interval) : bool =
+      intvl = Empty
+
+
+    let contains (intvl : interval) (x : Endpoint.t) : bool =
+      match intvl with
+      | Interval (a,b) -> compare a x < 0 && compare x b < 0
+      | Empty -> false
+
+    let intersect (intvl1 : interval) (intvl2 : interval) : interval =
+      match intvl1, intvl2 with
+      | _, Empty -> Empty
+      | Empty, _ -> Empty
+      | Interval (a, b), Interval (c, d) ->
+        if compare a c > 0 && compare b d < 0 then Interval (a, b)
+        else if compare c a > 0 && compare d b < 0 then Interval (c, d)
+        else if compare b c > 0 && compare b d < 0
+          && compare a c < 0 then Interval (c, b)
+        else if compare d a > 0 && compare d b < 0
+          && compare c a < 0 then Interval (a, d)
+        else Empty
+  end
+;;
+
+(*)
 ........................................................................
 Exercise 3B: Use the MakeBestInterval functor to create a new int
 interval module, and test that it works as expected.
@@ -276,4 +345,8 @@ instead?
     IntBestInterval.is_empty (IntBestInterval.Interval (4, 3)) ;;
 ......................................................................*)
 
-module IntBestInterval = struct end ;;
+module IntBestInterval = MakeBestInterval
+  (struct
+    type t = int
+    let compare = Stdlib.compare
+  end) ;;
